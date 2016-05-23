@@ -420,6 +420,7 @@ CONFIGURE_OPTS="
 --with-libxml \
 --with-openssl \
 --with-ldap \
+--includedir=/usr/local/include \
 --mandir=/usr/local/pgsql/${PGVERSION}/man \
 --docdir=/usr/local/pgsql/${PGVERSION}/doc"
 
