@@ -365,10 +365,10 @@ size=${PG_STATS_TEMP_SIZE},uid=postgres,gid=postgres 0 0" >> /etc/fstab
 PKG='bison gcc flex gettext make'
 
 # Pacotes Debian
-PKG_DEB='libreadline-dev libssl-dev libxml2-dev libldap2-dev libperl-dev python-dev chkconfig'
+PKG_DEB='libreadline-dev libssl-dev libxml2-dev libldap2-dev libperl-dev python-dev uuid-dev chkconfig'
 
 # Pacotes RedHat
-PKG_RH='readline-devel openssl-devel libxml2-devel openldap-devel perl-devel python-devel perl-ExtUtils-MakeMaker perl-ExtUtils-Embed'
+PKG_RH='readline-devel openssl-devel libxml2-devel openldap-devel perl-devel uuid-devel python-devel perl-ExtUtils-MakeMaker perl-ExtUtils-Embed'
 
 # Conforme o tipo de distro utilizar os respectivos pacotes para instalação
 if [ ${DISTRO_FAMILY} = '1' ]; then
@@ -420,6 +420,7 @@ CONFIGURE_OPTS="
 --with-libxml \
 --with-openssl \
 --with-ldap \
+--with-uuid=ossp \
 --includedir=/usr/local/include \
 --mandir=/usr/local/pgsql/${PGVERSION}/man \
 --docdir=/usr/local/pgsql/${PGVERSION}/doc"
