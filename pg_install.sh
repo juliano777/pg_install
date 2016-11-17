@@ -362,7 +362,7 @@ size=${PG_STATS_TEMP_SIZE},uid=postgres,gid=postgres 0 0" >> /etc/fstab
 #==============================================================================
 
 # Pacotes comuns
-PKG='bison gcc flex gettext make'
+PKG='bison gcc flex gettext make bzip2'
 
 # Pacotes Debian
 PKG_DEB='libreadline-dev libssl-dev libxml2-dev libldap2-dev libperl-dev python-dev uuid-dev chkconfig'
