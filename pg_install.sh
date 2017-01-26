@@ -365,7 +365,7 @@ size=${PG_STATS_TEMP_SIZE},uid=postgres,gid=postgres 0 0" >> /etc/fstab
 PKG='bison gcc flex gettext make bzip2'
 
 # Pacotes Debian
-PKG_DEB='libreadline-dev libssl-dev libxml2-dev libldap2-dev libperl-dev libossp-uuid-dev python-dev chkconfig'
+PKG_DEB='libreadline-dev libssl-dev libxml2-dev libldap2-dev libperl-dev libossp-uuid-dev python-dev'
 
 # Pacotes RedHat
 PKG_RH='readline-devel openssl-devel libxml2-devel openldap-devel perl-devel uuid-devel python-devel perl-ExtUtils-MakeMaker perl-ExtUtils-Embed'
