@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 ##############################################################################
 #                                                                            # 
@@ -51,7 +51,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 if (command -v systemctl > /dev/null); then
     SYSTEMD=true
 else
-    SYSTEMD=false
+    echo -e "\nErro: Compatível apenas com SystemD!\n"
+    exit 1
 fi
 
 # Criar grupo de sistema postgres:
@@ -211,7 +212,7 @@ done
 # Baixando o código-fonte silenciosamente e em background
 (wget --quiet -c \
 ftp://ftp.postgresql.org/pub/source/v${PGVERSIONXYZ}/\
-postgresql-${PGVERSIONXYZ}.tar.bz2 -P /tmp/) &
+postgresql-${PGVERSIONXYZ}.tar.bz2 -P /tmp/ && > /tmp/.pg_install.down) &
 
 # Versão majoritária (X.Y) do PostgreSQL
 PGVERSION=`echo ${PGVERSIONXYZ} | cut -f1-2 -d.`
@@ -341,9 +342,10 @@ PG_STATS_TEMP_SIZE_TMP='32M'
 if [ -z ${PG_STATS_TEMP_SIZE} ]; then
     # Usuário informa o tamanho em RAM como ponto de montagem par estatísticas
     # temporárias:
-    read -p \
-    "Tamanho em RAM o diretório de estatísticas temporárias \
-    (padrão 32M): " PG_STATS_TEMP_SIZE
+
+    MSG='Tamanho em RAM o diretório de estatísticas temporárias ' \
+    '(padrão 32M): ' &> /dev/null
+    read -p "${MSG}" PG_STATS_TEMP_SIZE
 
     # Se nada for informado, atribuir à variável desejada o valor da
     # variável temporária
@@ -365,7 +367,7 @@ size=${PG_STATS_TEMP_SIZE},uid=postgres,gid=postgres 0 0" >> /etc/fstab
 PKG='bison gcc flex gettext make bzip2'
 
 # Pacotes Debian
-PKG_DEB='libreadline-dev libssl-dev libxml2-dev libldap2-dev libperl-dev python-dev uuid-dev chkconfig'
+PKG_DEB='libreadline-dev libssl-dev libxml2-dev libldap2-dev libperl-dev libossp-uuid-dev python-dev chkconfig'
 
 # Pacotes RedHat
 PKG_RH='readline-devel openssl-devel libxml2-devel openldap-devel perl-devel uuid-devel python-devel perl-ExtUtils-MakeMaker perl-ExtUtils-Embed'
@@ -380,7 +382,13 @@ else
 fi
 
 # Criação de diretórios
-mkdir -p ${PG_INSTALL_DIR}/src/ ${PGCONF} ${PGLOG} ${PG_XLOG} ${PGDATA}
+mkdir -p ${PG_INSTALL_DIR}/src/ ${PGCONF} ${PGLOG} ${PG_XLOG} ${PGDATA} 
+
+# Verifica se o arquivo de controle existe
+while [ ! -f /tmp/.pg_install.down ]; do sleep 5; done
+
+# Remove arquivo de controle
+rm -f /tmp/.pg_install.down
 
 # Mover o código-fonte baixado para o sub-diretório src no diretório de
 # instalação:
@@ -475,58 +483,7 @@ TimeoutSec=300
 WantedBy=multi-user.target
 "
 
-# Tomada de decisão se for SystemD ou não
-if ${SYSTEMD}; then
-    # Criação do arquivo de serviço
-    echo "${SYSTEMD_FILE}" > /lib/systemd/system/postgresql-${PGVERSION}.service
-
-    # Habilita o serviço na inicialização
-    systemctl enable postgresql-${PGVERSION}.service
-else
-    # Copiar o script de inicialização para o diretório /etc/init.d:
-    cp contrib/start-scripts/linux /etc/init.d/postgresql-${PGVERSION}
-
-    # Dá permissão de execução ao script:
-    chmod +x /etc/init.d/postgresql-${PGVERSION}
-
-    # Adiciona o script para a inicialização:
-    chkconfig --add  postgresql-${PGVERSION}
-
-    #==============================================================================
-    # ALTERAÇÕES NO SCRIPT DE INICIALIZAÇÃO
-    #==============================================================================
-
-    # Alterar prefix
-    sed "s:\(^prefix.*\):#\1\nprefix='${PG_INSTALL_DIR}':g" -i /etc/init.d/postgresql-${PGVERSION}
-
-    # Adicionar PGBIN logo depois de prefix
-    sed "s:\(^prefix.*\):\1\n\n#Directory for binaries\nPGBIN='${PGBIN}':g" \
-    -i /etc/init.d/postgresql-${PGVERSION}
-
-    # PGDATA
-    sed "s:\(^PGDATA.*\):#\1\nPGDATA='${PGDATA}':g" \
-    -i /etc/init.d/postgresql-${PGVERSION}
-
-    # Alterar PGUSER
-    sed "s:^PGUSER.*:PGUSER='postgres':g" \
-    -i /etc/init.d/postgresql-${PGVERSION}
-
-    # Alterar PGLOG
-    sed "s:\(^PGLOG.*\):#\1\nPGLOG=\"${PGLOG}/serverlog\":g" \
-    -i /etc/init.d/postgresql-${PGVERSION}
-
-    # Alterar PATH
-    sed 's;\(^PATH.*\);#\1\nPATH=\"\${PGBIN}:\${PATH}\";g' \
-    -i /etc/init.d/postgresql-${PGVERSION}
-
-    # Alterar DAEMON
-    sed 's:\(^DAEMON.*\):#\1\nDAEMON="\${PGBIN}/postgres":g' \
-    -i /etc/init.d/postgresql-${PGVERSION}
-
-    # Alterar PGCTL
-    sed 's:\(^PGCTL.*\):#\1\nPGCTL="\${PGBIN}/pg_ctl":g' \
-    -i /etc/init.d/postgresql-${PGVERSION}
-fi
+echo "${SYSTEMD_FILE}" > /lib/systemd/system/postgresql-${PGVERSION}.service
 
 
 #==============================================================================
@@ -560,7 +517,7 @@ su - postgres -c "mv ${PGDATA}/*.conf ${PGCONF}/"
 su - postgres -c "ls ${PGCONF}/* | xargs -i ln -sf {} ${PGDATA}/"
 
 # Criar diretório de estatísticas temporárias
-mkdir ${PG_STATS_TEMP}
+mkdir -p ${PG_STATS_TEMP} &> /dev/null
 
 # Dar propriedade a usuário e grupo postgres
 chown -R postgres: ${PG_STATS_TEMP}
@@ -596,11 +553,6 @@ sed "s:\(^#stats_temp_directory.*\):\1\nstats_temp_directory = '${PG_STATS_TEMP}
 # Monta tudo definido em /etc/fstab
 mount -a
 
-# Inicia o serviço conforme o sistema de inicialização
-if ${SYSTEMD}; then    
-    systemctl start postgresql-${PGVERSION}
-else
-    service postgresql-${PGVERSION} start
-fi
-
+# Inicia o serviço
+systemctl start postgresql-${PGVERSION}
 #==============================================================================
