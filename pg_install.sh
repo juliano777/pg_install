@@ -343,9 +343,9 @@ if [ -z ${PG_STATS_TEMP_SIZE} ]; then
     # Usuário informa o tamanho em RAM como ponto de montagem par estatísticas
     # temporárias:
 
-    MSG='Tamanho em RAM o diretório de estatísticas temporárias ' \
+    MSG_STAT='Tamanho em RAM o diretório de estatísticas temporárias ' \
     '(padrão 32M): ' &> /dev/null
-    read -p "${MSG}" PG_STATS_TEMP_SIZE
+    read -p "${MSG_STAT}" PG_STATS_TEMP_SIZE
 
     # Se nada for informado, atribuir à variável desejada o valor da
     # variável temporária
