@@ -343,7 +343,7 @@ if [ -z ${PG_STATS_TEMP_SIZE} ]; then
     # Usuário informa o tamanho em RAM como ponto de montagem par estatísticas
     # temporárias:
 
-    read -p 'RAM Disk size for temporary statistics [32M] ' PG_STATS_TEMP_SIZE &> /dev/null
+    read -p 'RAM Disk size for temporary statistics [32M] ' PG_STATS_TEMP_SIZE
 
     # Se nada for informado, atribuir à variável desejada o valor da
     # variável temporária
