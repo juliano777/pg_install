@@ -553,4 +553,8 @@ mount -a
 
 # Inicia o serviço
 systemctl start postgresql-${PGVERSION}
+
+# Enable service at boot
+systemctl enable postgresql-${PGVERSION}
+
 #==============================================================================
