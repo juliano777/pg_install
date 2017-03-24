@@ -376,7 +376,8 @@ if [ ${DISTRO_FAMILY} = '1' ]; then
     aptitude -y install ${PKG}    
 else
     PKG_PY3=`yum search python3 | egrep "^python3.\.x86_64" | cut -f1 -d. | sort -r | head -1`
-    PKG="${PKG} ${PKG_RH} ${PKG_PY3} ${PKG_PY3}-devel"
+    PKG="${PKG} ${PKG_RH} ${PKG_PY3}-devel"
+    yum -y ${PKG_PY3}
     yum -y install ${PKG}
 fi
 
