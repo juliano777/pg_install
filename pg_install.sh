@@ -365,19 +365,23 @@ size=${PG_STATS_TEMP_SIZE},uid=postgres,gid=postgres 0 0" >> /etc/fstab
 PKG='bison gcc flex gettext make bzip2'
 
 # Pacotes Debian
-PKG_DEB='libreadline-dev libssl-dev libxml2-dev libldap2-dev libperl-dev libossp-uuid-dev python-dev'
+PKG_DEB='libreadline-dev libssl-dev libxml2-dev libldap2-dev libperl-dev libossp-uuid-dev python3-dev'
 
 # Pacotes RedHat
-PKG_RH='readline-devel openssl-devel libxml2-devel openldap-devel perl-devel uuid-devel python-devel perl-ExtUtils-MakeMaker perl-ExtUtils-Embed'
+PKG_RH='readline-devel openssl-devel libxml2-devel openldap-devel perl-devel uuid-devel perl-ExtUtils-MakeMaker perl-ExtUtils-Embed'
 
 # Conforme o tipo de distro utilizar os respectivos pacotes para instalação
 if [ ${DISTRO_FAMILY} = '1' ]; then
     PKG="${PKG} ${PKG_DEB}"
-    aptitude -y install ${PKG}
+    aptitude -y install ${PKG}    
 else
     PKG="${PKG} ${PKG_RH}"
-    yum -y install ${PKG}
+    PKG_PY3=`yum search python3 | egrep "^python3.\.x86_64" | cut -f1 -d. | sort -r | head -1`
+    yum -y install "${PKG} ${PKG_PY3} ${PKG_PY3}-devel"
 fi
+
+# Python 3
+export PYTHON=`which python3`
 
 # Criação de diretórios
 mkdir -p ${PG_INSTALL_DIR}/src/ ${PGCONF} ${PGLOG} ${PG_XLOG} ${PGDATA} 
