@@ -462,6 +462,13 @@ export PGCONF="${PGCONF}"
 EOF
 
 
+# .psqlrc otimizado
+cat << EOF > ~postgres/.psqlrc
+\set HISTCONTROL ignoredups
+\set COMP_KEYWORD_CASE upper
+\x auto
+EOF
+
 #==============================================================================
 # SISTEMA DE INICIALIZAÇÃO
 #==============================================================================
